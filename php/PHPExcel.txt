@@ -1,0 +1,11 @@
+﻿thinkphp中使用phpexcel的问题
+
+// check mbstring.func_overload
+if (ini_get('mbstring.func_overload') & 2) {
+throw new Exception('Multibyte function overloading in PHP must be disabled for string functions (2).');
+}
+
+这是phpexcel的autoload.php中的代码，就因为这个始终抛出'Multibyte function overloading in PHP must be disabled for string functions (2).，不知道什么原因
+
+
+我也找了好久才发现的，需要把你php.ini 下面的;mbstring.func_overload =注释掉，然后重启apache 就OK了
