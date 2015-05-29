@@ -1,0 +1,91 @@
+PHP 5.5 on CentOS/RHEL 7.1, 6.6 and 5.11 via Yum
+PHP 5.5.23 has been released on PHP.net on 16th April 2015, and is also available for CentOS/RHEL 5.11, 6.6 and 7.1 at Webtatic via Yum.
+PHP 5.5 adds new features such as:
+Zend Optimizer+ opcode cache included, now known as opcache extension
+Generators
+try { } finally { }
+Literal dereferencing for arrays and strings
+Array return value de-referencing
+Class name resolution
+Password hashing API
+and much more
+To see what else has been added, check out the What has changed in PHP 5.5.x.
+
+To install, first you must add the Webtatic EL yum repository information corresponding to your CentOS/RHEL version to yum:
+
+CentOS/RHEL 7.x:
+
+rpm -Uvh https://mirror.webtatic.com/yum/el7/epel-release.rpm
+rpm -Uvh https://mirror.webtatic.com/yum/el7/webtatic-release.rpm
+CentOS/RHEL 6.x:
+
+rpm -Uvh https://mirror.webtatic.com/yum/el6/latest.rpm
+CentOS/RHEL 5.x:
+
+rpm -Uvh http://mirror.webtatic.com/yum/el5/latest.rpm
+Now you can install PHP 5.5 (along with an opcode cache) by doing:
+
+yum install php55w php55w-opcache
+If you would like to upgrade php to this version it is recommended that you first check that your system will support the upgrade, e.g. making sure any CPanel-like software can run after the upgrade.
+
+Unless you know what you are doing, it is risky upgrading an existing system. ItÅfs much safer to do this by provisioning a separate server to perform the upgrade as a fresh install instead.
+
+If you know what you are doing, you can upgrade PHP by:
+
+yum install yum-plugin-replace
+ 
+yum replace php-common --replace-with=php55w-common
+It will likely give you a message ÅgWARNING: Unable to resolve all providers ÅcÅh. This is normal, and you can continue by tying ÅgyÅg. You will be given a chance to see what packages will be installed and removed before again being given a chance to confirm.
+
+Packages
+
+Package	Provides
+php55w	mod_php, php55w-zts
+php55w-bcmath	
+php55w-cli	php-cgi, php-pcntl, php-readline
+php55w-common	php-api, php-bz2, php-calendar, php-ctype, php-curl, php-date, php-exif, php-fileinfo, php-ftp, php-gettext, php-gmp, php-hash, php-iconv, php-json, php-libxml, php-openssl, php-pcre, php-pecl-Fileinfo, php-pecl-phar, php-pecl-zip, php-reflection, php-session, php-shmop, php-simplexml, php-sockets, php-spl, php-tokenizer, php-zend-abi, php-zip, php-zlib
+php55w-dba	
+php55w-devel	
+php55w-embedded	php-embedded-devel
+php55w-enchant	
+php55w-fpm	
+php55w-gd	
+php55w-imap	
+php55w-interbase	php_database, php-firebird
+php55w-intl	
+php55w-ldap	
+php55w-mbstring	
+php55w-mcrypt	
+php55w-mssql	
+php55w-mysql	php-mysqli, php_database
+php55w-mysqlnd	php-mysqli, php_database
+php55w-odbc	php-pdo_odbc, php_database
+php55w-opcache	php55w-pecl-zendopcache
+php55w-pdo	
+php55w-pecl-gearman	
+php55w-pecl-geoip	
+php55w-pecl-memcache	
+php55w-pecl-xdebug	
+php55w-pgsql	php-pdo_pgsql, php_database
+php55w-process	php-posix, php-sysvmsg, php-sysvsem, php-sysvshm
+php55w-pspell	
+php55w-recode	
+php55w-snmp	
+php55w-soap	
+php55w-tidy	
+php55w-xml	php-dom, php-domxml, php-wddx, php-xsl
+php55w-xmlrpc	
+Opcode Caches
+
+The PHP distribution now comes with an opcode cache. This is the Zend Optimizer+ opcode cache, now known as the Zend OPcache extension. This extension is optional, so does not preclude you from using an alternate one. APC has been less maintained in recent years, so not as suitable (however it did also have a very convenient in-process user-cache which will be missed).
+
+Due to it being included in the PHP source distribution, it will be well maintained and more suitable for use while other Opcode cacheÅfs are being updated over the coming months.
+
+yum install php55w-opcache
+Webtatic will investigate the stability of APC for PHP 5.5, but cannot guarantee it stable enough to be included in the Yum repository.
+
+error_reporting E_ALL now includes E_STRICT
+
+As mentioned in the PHP 5.4 guide:
+
+You may get a lot more errors coming out of your error logs if by default your error_reporting is set to E_ALL now without explicitly turning off E_STRICT. The default php.ini that comes with the PHP package turns this off by default, but if you are upgrading from an existing installation, your php.ini may not be updated, meaning this will likely be turned on.
