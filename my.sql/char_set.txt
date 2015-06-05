@@ -1,0 +1,84 @@
+?看字符集?置
+mysql> show variables like 'collation_%';
++----------------------+-----------------+
+| Variable_name         | Value            |
++----------------------+-----------------+
+| collation_connection | utf8_general_ci |
+| collation_database    | utf8_general_ci |
+| collation_server      | utf8_general_ci |
++----------------------+-----------------+
+3 rows in set (0.02 sec)
+mysql> show variables like 'character_set_%';
++--------------------------+----------------------------+
+| Variable_name             | Value                       |
++--------------------------+----------------------------+
+| character_set_client      | utf8                        |
+| character_set_connection | utf8                        |
+| character_set_database    | utf8                        |
+| character_set_filesystem | binary                      |
+| character_set_results     | utf8                        |
+| character_set_server      | utf8                        |
+| character_set_system      | utf8                        |
+| character_sets_dir        | /usr/share/mysql/charsets/ |
++--------------------------+----------------------------+
+8 rows in set (0.02 sec)
+mysql>
+
+其他的一些?置方法：
+修改数据?的字符集
+mysql>use mydb
+mysql>alter database mydb character set utf-8;
+?建数据?指定数据?的字符集
+mysql>create database mydb character set utf-8;
+通?配置文件修改:
+修改/var/lib/mysql/mydb/db.opt
+default-character-set=latin1
+default-collation=latin1_swedish_ci
+?
+default-character-set=utf8
+default-collation=utf8_general_ci
+重起MySQL:
+[root@bogon ~]# /etc/rc.d/init.d/mysql restart
+通?MySQL命令行修改:
+mysql> set character_set_client=utf8;
+Query OK, 0 rows affected (0.00 sec)
+mysql> set character_set_connection=utf8;
+Query OK, 0 rows affected (0.00 sec)
+mysql> set character_set_database=utf8;
+Query OK, 0 rows affected (0.00 sec)
+mysql> set character_set_results=utf8;
+Query OK, 0 rows affected (0.00 sec)
+mysql> set character_set_server=utf8;
+Query OK, 0 rows affected (0.00 sec)
+mysql> set character_set_system=utf8;
+Query OK, 0 rows affected (0.01 sec)
+mysql> set collation_connection=utf8;
+Query OK, 0 rows affected (0.01 sec)
+mysql> set collation_database=utf8;
+Query OK, 0 rows affected (0.01 sec)
+mysql> set collation_server=utf8;
+Query OK, 0 rows affected (0.01 sec)
+?看:
+mysql> show variables like 'character_set_%';
++--------------------------+----------------------------+
+| Variable_name             | Value                       |
++--------------------------+----------------------------+
+| character_set_client      | utf8                        |
+| character_set_connection | utf8                        |
+| character_set_database    | utf8                        |
+| character_set_filesystem | binary                      |
+| character_set_results     | utf8                        |
+| character_set_server      | utf8                        |
+| character_set_system      | utf8                        |
+| character_sets_dir        | /usr/share/mysql/charsets/ |
++--------------------------+----------------------------+
+8 rows in set (0.03 sec)
+mysql> show variables like 'collation_%';
++----------------------+-----------------+
+| Variable_name         | Value            |
++----------------------+-----------------+
+| collation_connection | utf8_general_ci |
+| collation_database    | utf8_general_ci |
+| collation_server      | utf8_general_ci |
++----------------------+-----------------+
+3 rows in set (0.04 sec)
