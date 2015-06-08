@@ -1,0 +1,246 @@
+[root@ip-172-31-16-240 redmine]#yum install zlib-devel curl-devel openssl-devel httpd-devel apr-devel apr-util-devel mysql-devel
+[root@ip-172-31-16-240 redmine]#yum install vim
+[root@ip-172-31-16-240 redmine]#yum groupinstall 'Development tools'
+[root@ip-172-31-16-240 redmine]#vim /etc/yum.repos.d/Centos7.repo
+[root@ip-172-31-16-240 redmine]#******
+[root@ip-172-31-16-240 redmine]#[Centos7]
+[root@ip-172-31-16-240 redmine]#name=Centos7
+[root@ip-172-31-16-240 redmine]#baseurl=http://mirror.centos.org/centos/7/os/x86_64/
+[root@ip-172-31-16-240 redmine]#gpgcheck=0
+[root@ip-172-31-16-240 redmine]#enabled=0
+[root@ip-172-31-16-240 redmine]#******
+[root@ip-172-31-16-240 redmine]#yum groupinstall 'Development tools'
+[root@ip-172-31-16-240 redmine]#yum install ruby
+[root@ip-172-31-16-240 redmine]#yum install wget
+[root@ip-172-31-16-240 redmine]#wget http://dev.mysql.com/get/mysql-community-release-el7-5.noarch.rpm
+[root@ip-172-31-16-240 redmine]#rpm -ivh mysql-community-release-el7-5.noarch.rpm
+[root@ip-172-31-16-240 redmine]#yum install mysql mysql-server
+[root@ip-172-31-16-240 redmine]#systemctl enable mysqld
+[root@ip-172-31-16-240 redmine]#systemctl start mysqld
+[root@ip-172-31-16-240 redmine]#wget ftp://ftp.muug.mb.ca/mirror/centos/7.1.1503/os/x86_64/Packages/ruby-devel-2.0.0.598-24.el7.x86_64.rpm
+[root@ip-172-31-16-240 redmine]#rpm -ivh ruby-devel-2.0.0.598-24.el7.x86_64.rpm
+[root@ip-172-31-16-240 redmine]#gem install rails
+[root@ip-172-31-16-240 redmine]#wget http://www.redmine.org/releases/redmine-3.0.3.tar.gz
+[root@ip-172-31-16-240 redmine]#mysql -uroot
+[root@ip-172-31-16-240 ~]# mysql -uroot
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 3
+Server version: 5.6.25 MySQL Community Server (GPL)
+Copyright (c) 2000, 2015, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql>  show variables like 'character_set_%';
++--------------------------+----------------------------+
+| Variable_name            | Value                      |
++--------------------------+----------------------------+
+| character_set_client     | utf8                       |
+| character_set_connection | utf8                       |
+| character_set_database   | latin1                     |
+| character_set_filesystem | binary                     |
+| character_set_results    | utf8                       |
+| character_set_server     | latin1                     |
+| character_set_system     | utf8                       |
+| character_sets_dir       | /usr/share/mysql/charsets/ |
++--------------------------+----------------------------+
+8 rows in set (0.00 sec)
+
+mysql> set character_set_client=utf8;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> set character_set_connection=utf8;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> set character_set_database=utf8;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> set character_set_results=utf8;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> set character_set_server=utf8;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> set character_set_system=utf8;
+ERROR 1238 (HY000): Variable 'character_set_system' is a read only variable
+mysql>  show variables like 'character_set_%';
++--------------------------+----------------------------+
+| Variable_name            | Value                      |
++--------------------------+----------------------------+
+| character_set_client     | utf8                       |
+| character_set_connection | utf8                       |
+| character_set_database   | utf8                       |
+| character_set_filesystem | binary                     |
+| character_set_results    | utf8                       |
+| character_set_server     | utf8                       |
+| character_set_system     | utf8                       |
+| character_sets_dir       | /usr/share/mysql/charsets/ |
++--------------------------+----------------------------+
+8 rows in set (0.00 sec)
+
+mysql> show variables like 'collation_%';
++----------------------+-----------------+
+| Variable_name        | Value           |
++----------------------+-----------------+
+| collation_connection | utf8_general_ci |
+| collation_database   | utf8_general_ci |
+| collation_server     | utf8_general_ci |
++----------------------+-----------------+
+3 rows in set (0.00 sec)
+
+mysql> exit
+[root@ip-172-31-16-240 ~]#cd  /usr/local
+[root@ip-172-31-16-240 ~]#tar -zxvf redmine-x.x.x.tar.gz
+[root@ip-172-31-16-240 ~]#mv redmine-x.x.x  redmine
+[root@ip-172-31-16-240 ~]#cd redmine/config
+[root@ip-172-31-16-240 ~]#cp  database.yml.example   database.yml
+[root@ip-172-31-16-240 ~]#vi  database.yml
+[root@ip-172-31-16-240 ~]#yum install ImageMagick-devel
+[root@ip-172-31-16-240 ~]#gem install bundler
+[root@ip-172-31-16-240 ~]#cd /usr/local/redmine
+[root@ip-172-31-16-240 redmine]#bundle install --without development test
+[root@ip-172-31-16-240 redmine]#bundle install --without development test rmagick
+[root@ip-172-31-16-240 redmine]#rake generate_secret_token
+[root@ip-172-31-16-240 redmine]#rake generate_session_store
+[root@ip-172-31-16-240 redmine]#RAILS_ENV=production rake db:migrate
+[root@ip-172-31-16-240 redmine]#RAILS_ENV=production rake redmine:load_default_data
+[root@ip-172-31-16-240 redmine]#mkdir -p tmp tmp/pdf public/plugin_assets
+[root@ip-172-31-16-240 redmine]#chown -R ec2-user:ec2-user files log tmp public/plugin_assets
+[root@ip-172-31-16-240 redmine]#chmod -R 755 files log tmp public/plugin_assets
+[root@ip-172-31-16-240 redmine]#ruby script(bin)/rails server webrick -e production –b 0.0.0.0
+访问服务器：http://IP:3000 默认登录帐号：admin / admin
+[root@ip-172-31-16-240 ~]#cd /usr/local/redmine/config/
+[root@ip-172-31-16-240 ~]#vi configuration.yml
+[root@ip-172-31-16-240 ~]#yum -y install httpd-devel apr-devel apr-util-devel
+[root@ip-172-31-16-240 ~]#gem install passenger -V
+[root@ip-172-31-16-240 ~]#passenger-install-apache2-module
+[root@ip-172-31-16-240 ~]#vim /etc/httpd/conf/httpd.conf
+	LoadModule passenger_module /usr/local/lib/ruby/gems/2.0.0/gems/passenger-4.0.37/buildout/apache2/mod_passenger.so
+	<IfModule mod_passenger.c>
+		PassengerRoot /usr/local/lib/ruby/gems/2.0.0/gems/passenger-4.0.37
+		PassengerDefaultRuby /usr/local/bin/ruby
+	</IfModule>
+	<virtualhost *:80>
+	ServerName redmine
+	ServerAdmin redmine
+	DocumentRoot /usr/local/redmine/public/
+	ErrorLog logs/redmine_error_log
+	
+	<directory "/usr/local/redmine/public/" >
+		Options -MultiViews
+		Require all granted
+		AllowOverride all
+	</directory>
+	</virtualhost>
+
+[root@ip-172-31-16-240 ~]#systemctl start httpd
+
+
+1定位（到redmine所在的路径下的config/certs）创建RAS秘钥
+  openssl genrsa -des3 -out server.key 1024
+2 创建CSR（Certificate signing request）
+  openssl req –new –key server.key –out server.csr
+3 去掉私钥中的passphrase
+  cp server.key server.key.org
+  openssl rsa –in server.key.org –out server.key
+4 创建自签名认证
+  openssl x509  -req –days 365 –in server.csr –singkey server.key-out server.crt
+  cd 回 redmine目录
+5 创建 Webrick启动脚本
+
+	vi script/server.ssl
+以下是ruby脚本代码
+#!/usr/bin/env ruby
+require File.dirname(_FILE_)
+require ‘webrick’
+#包含必须的库
+require ‘webrick/https’
+require ‘optparse’
+puts “=>Booting WEBrick…”
+OPTIONS = (
+# 端口号
+:port   =>3001,
+#监听主机地址
+:Host   =>”xxx.xx.xx.x”, //host所对应的IP
+:environment => (ENV[‘RALS.ENV’] || “development”).dup,
+#存放 redmine 中public的路径，在这里采用相对路径，保证可移植性
+:server root => File.expand path(File.dirname(_FILE_) + “/../public”),
+#存放私钥的地址
+:pkey      => Openssl::PKey::RSA.new(
+File.open(File.dirname(_FILE_) +”/../config/certs/server.key”).read),
+#存放签名证书的地址
+:cert      =>Openssl::X509::Certificate.new(
+			   File.open(File.dirname(_FILE_) + “/../comfig/certs/server.crt”).read),
+:server_type  =>  WEBrick::SimpleServer,
+:charset      =>  “UTF-8”,
+:mime_types  =>  WEBrick::HTTPUtils::DefaultMimeTypes,
+:config       =>  RAILS_ROOT + “/config.ru”,
+:detach      =>  false,
+:debugger    =>  false,
+:path        =>  nil
+)
+#以下读入命令行参数
+ARGV.clone.options do |opts|
+  opts.on(“-p”,”--port=port”,Imteger,
+“Runs Rails on the specified port.”,”Default:3001){|v| OPTIONS:[:Port] = v}
+  opts.on(“-b”,”--binding=ip”,String,
+“Binds Rails to the specified ip.”,”Default:0.0.0.0”){|v| OPTIONS[:Host] = v}
+  opts.on(“-d”,”--daemon”,”Make server run as a Daemon.”){
+OPTIONS[:detach] = true}
+  opts.on(“-u”,”--debugger”,”Enable ruby-debugging for the server.”){
+OPTIONS[:debugger] =true}
+  opts.on(“-e”,”--environment=name”,String,”Specifies the enmironment to rin this server under(test/development/production).”,”Defualt:development”){|v| OPTIONS[:environment] = v}
+  opts.separator “”
+  opts.on(“-h”,”--help”,”Show this help message.”){puts opts:exit}
+  opts.parse!
+end
+#设置启动环境，production或development等
+ENV[“RAILs _ENV”] =OPTIONS[:environment]
+RAILS_ENV.replace(OPTIONS[:environment]) if defined?(RAILS_ENV)
+#读取redmine配置文件
+require File.dirname(_FILE_) + “/../config/enviroment”
+require ‘webrick server’
+require ‘webrick/https’
+OPTIONS[‘working_directory’] =File.expand_path(File.dirname(_FILE_))
+#初始化带SSL的webrick服务器
+class SSLDispatchServlet < DispatchServlet
+  def self.dispatch(options)
+    Socket.do_not_reverse_lookup = true
+    server = WEBrick::HTTPServer.new(
+		:port          =>  options[:port].to_i,
+		:ServerType    	=>  options[:server_type],
+		:BindAddress	=>  options[:Host],
+		:SSLEnable		=>  true
+		:SSLVerifyClient	=>  OpenSSL::SSL::VERIFY_NONE,
+		:SSLCertifieate	=>  options[:cert],
+		:SSLPrivateKey	=>  options[:pkey],
+		:SSLCertName	=>  [ [ “CN”,WEBrick::Utils::getservername ] ]
+)
+server.mount(‘/’,DispatchServlet,options)
+trap(“INT”){server.shutdown}
+Server.start
+end
+end
+#输出启动提示
+puts “=> Rails #{Rails,versionl} application starting on https://#{OPTIONS[:Host]} :#{OPTIONS[:port]}”
+#如果用户在命令行输入“-d“参数，则程序将在后台运行
+If OPTIONS[:detach]
+  Process.deamon
+  Pid = “#{RAILS_ROOT}/tmp/pids/server.pid”
+  File.open(pid,’w’){ |f| f.write(Process.pid) }
+at_exit { Fils.delete(pid) if File.exist?(pid) }
+end
+#没有“-d“参数时在终端输出提示，此时可以通过”ctrl+c“关闭服务器
+puts “=> Call with –d to detach”
+trap(:INT){ exit }
+puts “=> Ctrl –C to shutdown”
+#启动webrick服务器
+SSLDispatchServlet.dispatch(OPTIONS)
+6 将脚本参数设置为可执行
+ chmod +x script/server.ssl
+7 启动ruby脚本
+ ruby script/server_ssl –e production //在终端运行
+ ruby script/server_ssl –e production –d //在后台运行
