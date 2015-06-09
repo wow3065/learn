@@ -1,0 +1,43 @@
+﻿SVNとmod_dav_svnをインストール。
+$ sudo yum install subversion mod_dav_svn
+
+サンプルリポジトリの作成。
+$ cd /svn
+$ sudo mkdir repos
+$ cd repos
+$ sudo mkdir sample
+$ sudo svnadmin create sample
+$ sudo svn mkdir file:///svn/repos/sample/trunk -m "create"
+$ sudo svn mkdir file:///svn/repos/sample/branches -m "create"
+$ sudo svn mkdir file:///svn/repos/sample/tags -m "create"
+
+これで一通り、SVNのリポジトリ作成までが完了。
+
+次は外部から接続できるようにApacheと連携します。
+$ sudo vi /etc/httpd/conf.d/subversion.conf
+
+以下を追加
+<Location /repos>
+DAV svn
+SVNPath /svn/repos/sample
+AuthzSVNAccessFile /svn/repos/sample/authzsvn.conf
+Require valid-user
+AuthType Basic
+AuthName "SVN repos"
+AuthUserFile /svn/repos/sample/.htpasswd
+Require all granted
+</Location>
+
+ec2-userと適当なPASSで認証周りの設定ファイルを用意。
+$ sudo htpasswd -cb /svn/repos/sample/.htpasswd ec2-user ec2-user_pass
+$ sudo vi /svn/repos/sample/authzsvn.conf
+
+以下を記述して用意は万端どす。
+[group]
+dev_grp = ec2-user
+[/]
+@dev_grp = rw
+
+嘘でした。権限を変更してApacheをリスタート。
+$ sudo chown -R apache:apache /svn/repos/sample
+$ sudo /sbin/service httpd restart
