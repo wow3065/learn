@@ -1,4 +1,7 @@
-﻿SVNとmod_dav_svnをインストール。
+﻿before svn install,selinux become disabled
+
+
+SVNとmod_dav_svnをインストール。
 $ sudo yum install subversion mod_dav_svn
 
 サンプルリポジトリの作成。
