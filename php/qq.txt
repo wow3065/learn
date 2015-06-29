@@ -1,0 +1,210 @@
+<script>
+ //在线客服插件 powered by casejs 极简主义 http://www.mlrzw.cn
+ function CaseService(caseServiceConfig) { 
+    this.config = caseServiceConfig;
+    this.elementId = this.config.elementId ;
+    this.tpl = {
+        'qq' : {
+            'href' : 'http://wpa.qq.com/msgrd?v=3&uin={#account#}&site=qq&menu=yes',
+            'img'  : 'http://wpa.qq.com/pa?p=2:{#account#}:{#style#}&time={#rand#}'
+        },'wangwang' : {
+            'href' : 'http://www.taobao.com/webww/ww.php?ver=3&touid={#account#}&siteid=cntaobao&status={#style#}&charset=utf-8',
+            'img'  : 'http://amos.alicdn.com/online.aw?v=2&uid={#account#}&site=cntaobao&s=1&charset=utf-8'
+        },'skype' : {
+            'href' : 'skype:{#account#}?call',
+            'img'  : 'http://mystatus.skype.com/smallclassic/{#account#}'
+        },'baiduhi' : {
+            'href' : 'baidu://message/?id={#account#}',
+            'img'  : 'http://tieba.baidu.com/tb/img/hi/hiOnline.gif'
+        },'msn' : {
+            'href' : 'msnim:chat?contact={#account#}',
+            'img'  : 'http://tieba.baidu.com/tb/img/hi/hiOnline.gif'
+        }
+    };
+    //创建html
+    this.buildHtml();
+    
+    //设置关闭
+    var that = this;
+    document.getElementById(this.elementId + '_sBtnClose').onclick = function(){
+      that.hide();
+    };
+    //设置打开
+    document.getElementById(this.elementId + '_sBtnOpenArea').onclick = function(){
+      that.show();
+    };
+    //将html对象赋值给element
+    this.element = document.getElementById(this.config.elementId);
+    //判断是否显示
+    this.config.isOpen ? this.show() : this.hide();
+    //最后滚动到的位置
+    this.lastScrollY = 0;
+    //滚动
+    this.slide();
+ } 
+ //显示浮动窗口
+ CaseService.prototype.show = function() {
+    document.getElementById(this.elementId + "_sBtnOpenArea").style.display = 'none';
+    document.getElementById(this.elementId + "_serviceWin").style.display = 'block';
+ };
+ //隐藏浮动窗口
+ CaseService.prototype.hide = function() {  
+    document.getElementById(this.elementId + "_serviceWin").style.display = 'none';
+    document.getElementById(this.elementId + "_sBtnOpenArea").style.display = 'block';
+    //如果设置了隐藏的时候关闭  取消事件 并清空 dom
+    if(this.config.closeAsHide == false){
+        if(this.interval){
+            window.clearInterval(this.interval);
+        }
+        //清空dom
+        this.element.innerHTML = '';
+    }
+ };
+ //滚动浮动窗口
+ CaseService.prototype.slide = function() {
+    //自动设置 定时事件
+    if(!this.interval){
+        var that = this;
+        this.interval = window.setInterval(function(){
+            that.slide();
+        },1);
+    }
+    //获取距离顶部的距离
+    if (document.documentElement && document.documentElement.scrollTop){
+        var diffY = document.documentElement.scrollTop;
+    }else{
+        var diffY = document.body.scrollTop
+    }
+    var percent = .1 * ( diffY - this.lastScrollY); 
+    percent = (percent > 0)?Math.ceil(percent):Math.floor(percent);
+    this.element.style.top = parseInt(this.element.style.top) + percent + "px";
+    this.lastScrollY += percent; 
+ };
+ CaseService.prototype.buildHtml = function(){
+    //设置关闭事件
+    var accountList = '';
+    for (i = 0;i < this.config.accountArray.length ; i++ ){
+        accountList +=  (function(){/* 
+            <div class="sItem">
+              <label>{#label#}</label>
+              <a target="_blank" href="{#href#}" title="{#tip#}">
+                <img src="{#img#}" alt="{#tip#}" />
+              </a>
+            </div>
+        */}.toString().replace(/^.+?\*|\\(?=\/)|\*.+?$/gi, ""))
+        //替换链接和状态图片 必须在前边
+        .replace(/{#href#}/g   , this.tpl[this.config.accountArray[i].type].href)
+        .replace(/{#img#}/g    , this.tpl[this.config.accountArray[i].type].img)
+        //替换其他参数
+        .replace(/{#label#}/g   , this.config.accountArray[i].label)
+        .replace(/{#account#}/g , this.config.accountArray[i].account)
+        .replace(/{#style#}/g   , this.config.accountArray[i].style)
+        .replace(/{#tip#}/g     , this.config.accountArray[i].tip)
+        .replace(/{#rand#}/g    , this.config.accountArray[i].rand); 
+    };
+    var css = (function(){/* 
+        <style type="text/css">
+        .caseService {font-family:'微软雅黑';text-align: left;}
+        .caseService .serviceWin {width:168px;height:auto;border:2px solid {#cssColor#};z-index:999999;}
+        .caseService .sTitle {background:{#cssColor#};padding:8px 10px;font-size:14px;color:#FFF;position:relative}
+        .caseService .sBtnClose {width: 25px;height: 25px;cursor: pointer;position: absolute;top: 3px;right: 10px;font-size: 25px;line-height: 25px;text-align: right;}
+        .caseService .sList {font-size: 14px;color: #444;font-size: 13px;line-height: 20px;padding: 10px;background: #FFF}
+        .caseService .sList .sItem{height:30px}
+        .caseService .sList label{display:block;width:47%;text-align:right;overflow:hidden;white-space:nowrap;height:30px;float:left}
+        .caseService .sList a{display:block;width:52%;float:left;overflow:hidden;height:30px;border:0;padding:0;margin:0}
+        .caseService .sList img{display:inline-block;border:0;padding:0;margin:0}
+        .caseService .other{border-top:1px dotted #ccc;margin-top:10px;font-size:17px;text-align:center;line-height:28px;padding-top:5px}
+        .caseService .sBtnOpenArea {background:{#cssColor#};height: auto;padding: 15px 0;width: 31px;display:none;color:#FFF;font-size:15px;text-align:center;line-height:20px;cursor:pointer}
+        .caseService .sBtnOpen{font-size: 24px;height: 25px;}
+        </style>
+    */}.toString().replace(/^.+?\*|\\(?=\/)|\*.+?$/gi, "")).replace(/{#cssColor#}/g,this.config.color);
+     
+    var tpl = (function(){/* 
+        <div id="{#elementId#}" class="caseService" style="{#style#}" >
+          <div id="{#elementId#}_sBtnOpenArea" class="sBtnOpenArea">
+            <div class="sBtnOpen">＋</div>
+            {#closeTitle#}
+          </div>
+          <div id="{#elementId#}_serviceWin" class="serviceWin" style="{#width#}">
+              <div class="sTitle">{#openTitle#}
+                <div id="{#elementId#}_sBtnClose" class="sBtnClose">×</div>
+              </div>
+              <div class="sList">
+                {#accoundList#}
+                <div class="other">
+                {#other#}
+                </div>
+              </div>
+          </div>
+        </div>
+    */}.toString().replace(/^.+?\*|\\(?=\/)|\*.+?$/gi, ""));
+    //拼接Html
+    serviceWinTpl = css + tpl
+        .replace(/{#elementId#}/g,this.config.elementId)
+        .replace('{#other#}',this.config.other)
+        .replace('{#accoundList#}',accountList)
+        .replace('{#width#}',this.config.width)
+        .replace('{#style#}',this.config.style)
+        .replace('{#closeTitle#}',this.config.closeTitle)
+        .replace('{#openTitle#}',this.config.openTitle);
+    document.write(serviceWinTpl);
+ };
+    
+    
+ //在线客服插件 powered by casejs
+ new CaseService( {
+    "elementId": "myServiceWin",
+    "color": "#266ed2",
+    "openTitle": "客服中心",
+    "closeTitle": "联<br/>系<br/>我<br/>们",
+    "style": "right:0px; top:180px;position: absolute;",
+    "width": "width:170px;",
+    "isOpen": true,
+    "closeAsHide": true,
+    "other": "服务热线<br />0546-8238915",
+    "accountArray": [
+        {
+            "type": "qq",
+            "label": "在线客服：",
+            "account": "2095128673",
+            "tip": "客服当前在线,欢迎与我联系",
+            "style": "1"
+        },
+        {
+            "type": "qq",
+            "label": "在线客服：",
+            "account": "1113635625",
+            "tip": "客服在线",
+            "style": "1"
+        },
+        {
+            "type": "qq",
+            "label": "技术QQ：",
+            "account": "781787584",
+            "tip": "点击和我联系",
+            "style": "7"
+        },
+        {
+            "type": "wangwang",
+            "label": "技术旺旺：",
+            "account": "炫彩七零",
+            "tip": "点击与我联系",
+            "style": "1"
+        },
+        {
+            "type": "msn",
+            "label": "技术MSN：",
+            "account": "王磊芝",
+            "tip": "点击和我联系",
+            "style": "0"
+        },
+        {
+            "type": "skype",
+            "label": "Skype：",
+            "account": "15154625521",
+            "tip": "我在线请和我联系",
+            "style": "0"
+        }
+    ]
+ } );
+ </script>
