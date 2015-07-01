@@ -1,0 +1,1 @@
+﻿​解决窗口一闪而过的方法有在源程序后面添加getchar(); 或者添加头文件#include<stdlib.h>之后在mian函数结尾前写上system("pause");
