@@ -1,0 +1,73 @@
+﻿1 ansible vars优先顺序从高到低。
+	ansible-playbook test.yml  --extra-vars "test=[g,h,j]"
+	rols传值--->	- { role: apache, test: [11,132,f3] }
+	vars
+	host_vars
+	groups_vars
+
+2 当执行多台机器多个task时，每个task在所有机器上执行完毕才能到下一个task.
+  多个tasks执行时，从头到尾的顺序执行。
+
+3 playbook引入其他tasks方法
+	tasks:
+	- include: tasks/foo.yml
+	
+  playbook引入其他role方法
+	---
+	dependencies:
+		- { role: common, some_parameter: 3 }
+		- { role: apache, port: 80 }
+		- { role: postgres, dbname: blarg, other_parameter: 12 }
+  或者用全路径进行引入。
+	---
+	dependencies:
+		- { role: '/path/to/common/roles/foo', x: 1 }
+
+4 playbook的目录结构
+	site.yml
+	webservers.yml
+	fooservers.yml
+	roles/
+		common/
+			files/
+			templates/
+			tasks/
+			handlers/
+			vars/
+			defaults/
+			meta/
+		webservers/
+			files/
+			templates/
+			tasks/
+			handlers/
+			vars/
+			defaults/
+			meta/
+	This designates the following behaviors, for each role ‘x’:
+		If roles/x/tasks/main.yml exists, tasks listed therein will be added to the play
+		If roles/x/handlers/main.yml exists, handlers listed therein will be added to the play
+		If roles/x/vars/main.yml exists, variables listed therein will be added to the play
+		If roles/x/meta/main.yml exists, any role dependencies listed therein will be added to the list of roles (1.3 and later)
+		Any copy tasks can reference files in roles/x/files/ without having to path them relatively or absolutely
+		Any script tasks can reference scripts in roles/x/files/ without having to path them relatively or absolutely
+		Any template tasks can reference files in roles/x/templates/ without having to path them relatively or absolutely
+		Any include tasks can reference files in roles/x/tasks/ without having to path them relatively or absolutely
+5 vars 应用
+	This won’t work:
+	- hosts: app_servers
+	vars:
+		app_path: {{ base_path }}/22
+	
+	Do it like this and you’ll be fine:
+	- hosts: app_servers
+	vars:
+		app_path: "{{ base_path }}/22"
+  
+  执行时引入变量
+	普通引入： ansible-playbook release.yml --extra-vars "version=1.23.45 other_variable=foo"
+	或
+	json引入： --extra-vars '{"pacman":"mrs","ghosts":["inky","pinky","clyde","sue"]}'
+	或
+	json文件引入： --extra-vars "@some_file.json"
+	

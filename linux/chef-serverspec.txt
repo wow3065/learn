@@ -1,0 +1,73 @@
+1 依赖包安装确认
+	libyaml-0.1.3-1.1.el6.x86_64
+	libyaml-devel-0.1.3-1.1.el6.x86_64
+	libgcc-4.4.7-4.el6.x86_64
+	gcc-4.4.7-4.el6.x86_64
+	openssl-devel-1.0.1e-15.el6.x86_64
+	bison-2.4.1-5.el6.x86_64
+	libedit-devel-2.11-4.20080712cvs.1.el6.x86_64
+	libffi-devel-3.0.5-3.2.el6.x86_64
+2 ruby安装
+	tar zxvf ruby-2.1.5.tar.gz
+	cd ruby-2.1.5
+	./configure --with-opt-dir=/usr/local/lib/ --disable-install-doc
+	make
+	make install
+	ls -ltr /usr/local/bin/
+	------------
+	erb,gem,irb,rake,rdoc,ri,ruby,testrb
+	------------
+	ruby -v
+3 path引入（必要时实施）
+	vim ~/.bash_profile
+	<PATH=$PATH:$HOME/bin
+	--------
+	>PATH=$PATH:$HOME/bin:/usr/local/bin
+4 gem安装
+	gem install bundler-1.7.4.gem
+	gem install knife-solo-0.4.2.gem
+	gem install serverspec-2.7.1.gem
+5 客户端安装
+	rpm -ivh chef-11.6.0-1.el6.x86_64.rpm
+6 ssh nopassword设定以及sudo添加
+	ssh-keygen
+	cat /var/work/id_dsa.pub>authorized_keys
+7 chef验证
+	knife configure（一路回车）
+	knife solo init chef-repo
+	cd chef-repo
+	knife cookbook create testbook -o cookbooks
+	cd ../chef-repo/cookbooks/testbook/attributes
+　　	vi default.rb
+　　	--------------------
+　　	default["first_name"] = "Mickey"
+　　	normal["second_name"] = "Mouse"
+　　	--------------------
+	
+　　	cd ../chef-repo/cookbooks/testbook/recipes
+　　	vi default.rb
+　　	--------------------
+　　	template "/var/work/name.txt" do
+　　	    owner "root"
+　　	    group "root"
+　　	    mode 0777
+　　	    source "name.txt.erb"
+　　	    action :create
+　　	end
+　　	--------------------
+	
+　　	cd ../chef-repo/cookbooks/testbook/templates/default/
+　　	vi name.txt.erb
+　　	--------------------
+　　	My Name is <%= node["first_name"]%> <%= node["second_name"]%>.
+　　	This server address is <%= node[:ipaddress]%>.
+　　	--------------------
+	vim ../chef-repo/nodes/test.json
+	--------------------
+　　	{
+　　	    "run_list":[
+　　	        "recipe[testbook]"
+　　	    ]
+　　	}
+　　	--------------------
+	knife solo cook user@10.100.32.11 ../chef-repo/nodes/10.100.32.11.json
