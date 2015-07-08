@@ -1,0 +1,6 @@
+﻿1 用：分割并将用空格将一和二隔开
+cat /tmp/user.txt |awk -F: '{print $1 "  " $2}'
+2 用#分割并将用空格将一和二隔开
+cat /tmp/user.txt |awk -F "#" '{print $1 "  " $2}'
+3 -39一共39个字符不足时候空格补足
+cat /tmp/user.txt |awk -F: '{printf("%-39s\t%s\t%s\n",$1,$2,$3)}'

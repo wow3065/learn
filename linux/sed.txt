@@ -1,0 +1,6 @@
+﻿1 替换
+cat /tmp/user.txt |sed -e s/寻找的字符/换成的字符/g
+2 删除
+cat /tmp/user.txt |sed -e s/寻找的字符//g
+3 当替换的文件中含有/时
+cat /tmp/user.txt |sed -e s:/bin/bash:/bin/nologin:g
