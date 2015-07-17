@@ -1,0 +1,41 @@
+﻿1，设置tomcat编码，防止从solr中查询时，参数为中文因乱码而查不出结果：
+
+[root@liudk ~]# vi /opt/tomcat/conf/server.xml
+在8080端口对应的Connector中加入URIEncoding="UTF-8"，如下图（一定注意大小写）：
+ <Connector port="8080" protocol="HTTP/1.1"
+               connectionTimeout="20000"
+               redirectPort="8443" URIEncoding="UTF-8" />
+2，将solr服务器考到tomcat下，同时更名为solr.war
+
+[root@liudk ~]# cp solr-4.9.0/dist/solr-4.9.0.war /opt/tomcat/webapps/solr.war
+
+3，整合
+
+[root@liudk ~]# cp -r /root/solr-4.9.0/example/solr /opt/tomcat/webapps/solr/
+[root@liudk ~]# vi /opt/tomcat/webapps/solr/WEB-INF/web.xml
+解注释env-entry节点，并设置value值
+<env-entry>
+   <env-entry-name>solr/home</env-entry-name>
+   <env-entry-value>/opt/tomcat/webapps/solr/solr</env-entry-value>
+   <env-entry-type>java.lang.String</env-entry-type>
+</env-entry>
+
+重启tomcat,访问  报404错误，查看后台catalina.out有如下错误：
+
+INFO: Deploying web application archive solr.war
+Oct 18, 2013 11:03:27 PM org.apache.catalina.core.StandardContext start
+SEVERE: Error filterStart
+Oct 18, 2013 11:03:27 PM org.apache.catalina.core.StandardContext start
+SEVERE: Context [/solr] startup failed due to previous errors
+
+
+4，添加log包
+
+[root@liudk ~]# cp  solr-4.9.0/example/lib/ext/* /opt/tomcat/webapps/solr/WEB-INF/lib/
+临时使用example中的配置文件，后续可根据需要修改
+
+[root@liudk ~]# mkdir /opt/tomcat/webapps/solr/WEB-INF/classes/
+[root@liudk ~]# cp solr-4.9.0/example/resources/log4j.properties /opt/tomcat/webapps/solr/WEB-INF/classes/
+这里要注意，这个properties中的配置为：log4j.appender.file.File=${solr.log}/solr.log， solr.log为tomcat启动时指定的变量，如果没指定，日志文件可能会写到其他目录下。其实这里直接写成绝对路径也是不错的选择。
+
+重启tomcat，访问地址http://你的服务器ip或域名/solr/ 如果可以看到如下界面，证明配置成功了！
