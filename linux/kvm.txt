@@ -1,0 +1,2 @@
+ yum -y install qemu-kvm libvirt virt-install bridge-utils virt-manager(图像管理界面)
+ 

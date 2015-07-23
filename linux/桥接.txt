@@ -1,0 +1,17 @@
+ifcfg-eth0的配置：
+
+DEVICE=eth0
+TYPE=Ethernet
+ONBOOT=yes
+BRIDGE=br0    #注意添加此项
+
+不要奇怪，这里没有BOOTPROTO项是完全正常的，请继续操作。
+
+ifcfg-br0的配置：
+
+DEVICE=br0
+ONBOOT=yes
+BOOTPROTO=static
+IPADDR=10.152.11.149    #原先eth0的IP
+NETMASK=255.255.0.0     #原先eth0的子网掩码
+GATEWAY=10.152.255.254  #网关
