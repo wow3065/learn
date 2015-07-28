@@ -1,0 +1,9 @@
+﻿    Options none
+    AllowOverride AuthConfig      //打开认证功能
+    AuthName "hello"              //显示给用户的信息 
+    AuthType Basic  //认证类型
+    AuthUserFile /etc/httpd/conf/.htpasswd   //指定用户认证文件位置，文件名、路径可变，但尽量隐藏
+    Require user ck ck2 //指定可访问的用户，该用户为虚拟用户非系统用户
+    Require valid-user   //.htpasswd中的所有用户可用户可用
+    Order allow,deny
+    Allow from all
