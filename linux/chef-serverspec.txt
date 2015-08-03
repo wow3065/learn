@@ -71,3 +71,16 @@
 　　	}
 　　	--------------------
 	knife solo cook user@10.100.32.11 ../chef-repo/nodes/10.100.32.11.json
+	
+********************************************************************************
+1 serverspec引入文件
+
+  1.1 require '{Spec下的文件名}/{要引入的文件}'
+  1.2 load '../common/spec/apache/httpd.conf_spec.rb'
+2 chef引入
+	2.1 文件引入
+		include_recipe "apache_common::recipes_create_user"
+	2.2 工程引入
+		cookbook文件夹下的metadata.rb中添加
+		depends 'apache_common'
+  
