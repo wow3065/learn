@@ -10,6 +10,7 @@ CREATE USER 'pig'@'%' IDENTIFIED BY '123456';
 CREATE USER 'pig'@'%' IDENTIFIED BY ''; 
 CREATE USER 'pig'@'%'; 
 
+
 二,授权: 
 
 命令:GRANT privileges ON databasename.tablename TO 'username'@'host' 
@@ -18,6 +19,7 @@ CREATE USER 'pig'@'%';
 
 例子: GRANT SELECT, INSERT ON test.user TO 'pig'@'%'; 
 GRANT ALL ON *.* TO 'pig'@'%'; 
+flush privileges;
 
 注意:用以上命令授权的用户不能给其它用户授权,如果想让该用户可以授权,用以下命令: 
 GRANT privileges ON databasename.tablename TO 'username'@'host' WITH GRANT OPTION; 
@@ -27,6 +29,7 @@ GRANT privileges ON databasename.tablename TO 'username'@'host' WITH GRANT OPTIO
 命令:SET PASSWORD FOR 'username'@'host' = PASSWORD('newpassword');如果是当前登陆用户用SET PASSWORD = PASSWORD("newpassword"); 
 
 例子: SET PASSWORD FOR 'pig'@'%' = PASSWORD("123456"); 
+flush privileges;
 
 四.撤销用户权限 
 
@@ -85,3 +88,4 @@ mysql>select host, user from user;
 　　从任何主机上使用root用户，密码：youpassword（你的root密码）连接到mysql服务器：
 # mysql -u root -proot 
 mysql>GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY 'youpassword' WITH GRANT OPTION;
+mysql>flush privileges;
