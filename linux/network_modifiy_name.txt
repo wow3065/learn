@@ -1,0 +1,19 @@
+﻿到了CentOS 7的时候，原有的参数biosdevname=0不起作用了，网络设备变成了 eno1 这样的名称。如果你希望继续使用 eth0 这样的传统名称，那么在安装启动时加上参数：
+
+net.ifnames=0 biosdevname=0
+
+如果你已经安装完了，希望改成eth0这样的名称，那么需要：
+
+修改grub2启动参数
+
+vi /etc/sysconfig/grub
+
+GRUB_CMDLINE_LINUX=”rd.lvm.lv=vg0/swap vconsole.keymap=us crashkernel=auto  vconsole.font=latarcyrheb-sun16 net.ifnames=0 biosdevname=0 rd.lvm.lv=vg0/usr rhgb quiet”
+
+grub2-mkconfig -o /boot/grub2/grub.cfg
+
+重新对 文件进行命名：
+
+/etc/sysconfig/network-scripts/ifcfg-*
+
+CentOS 7 这种变化的原因，是由于systemd 和 udev 引入了一种新的网络设备命名方式–一致网络设备命名（CONSISTENT NETWORK DEVICE NAMING） 。可以根据固件、拓扑、位置信息来设置固定名字，带来的好处是命名自动化，名字完全可预测，在硬件坏了以后更换也不会影响设备的命名，这样可以让硬件的更换无缝化。带来的不利是新的设备名称比传统的名称难以阅读。比如心得名称是enp5s0.

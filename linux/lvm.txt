@@ -1,0 +1,35 @@
+﻿一、首先创建一块新的分区：
+
+fdisk  /dev/hda
+
+n
+
+l        #选择逻辑分区，如果没有，则首先创建扩展分区，然后再添加逻辑分区（硬盘：最多四个分区P-P-P-P或P-P-P-E）
+
+6        #分区号（从5开始），/dev/hda6
+
+t      8e   #分区类型8e表示LVM分区
+
+w        #写入分区表
+
+partprobe   #重读分区表
+
+mkfs –t ext3 /dev/hda6 #格式化
+
+partx /dev/hda #查看当前硬盘的分区表及使用情况
+
+二、创建PV，扩容VG，LV
+
+pvcreate /dev/hda6
+
+vgdisplay #查看当前已经存在的VG信息，以存在VG：VolGroup00为例
+
+vgextend VolGroup00 /dev/hda6    #扩展VolGroup00
+
+lvdisplay #查看已经存在的LV信息，以存在LV：LogVol01为例
+
+lvextend –L 1G /dev/VolGroup00/LogVol01 #扩展LV
+
+resize2fs /dev/VolGroup00/LogVol01 #执行该重设大小，对于当前正在使用的LogVol01有效
+
+df –h #查看挂载情况，已经扩容
