@@ -1,0 +1,93 @@
+﻿Mysql-proxy是什么，大家都知道，不知道的就别往下看了...
+首先搭建mysql主从数据库，参考：http://www.linuxidc.com/Linux/2011-03/33426.htm
+下载mysql-proxy最新版，本文撰写时最新版本为 MySQL Proxy 0.8.1 alpha
+安装mysql-proxy步骤如下：
+解压mysql-proxy-0.8.1-linux-glibc2.3-x86-32bit.gz
+tar zxvf mysql-proxy-0.8.1-linux-glibc2.3-x86-32bit.gz
+cp mysql-proxy-0.8.1-linux-glibc2.3-x86-32bit /usr/loc/proxy-mysql
+新建或编辑/etc/mysql-proxy.cnf文件，添加以下内容(具体参数根据实际情况修改)：
+vi /etc/mysql-proxy.cnf
+[mysql-proxy]
+admin-username = zhangdongyu
+admin-password = 123123
+daemon = true
+keepalive = true
+proxy-backend-addresses = 192.168.0.88:3306
+proxy-read-only-backend-addresses = 192.168.0.88:3307
+proxy-lua-script = /usr/local/proxy-mysql/share/doc/mysql-proxy/rw-splitting.lua
+admin-lua-script = /usr/local/proxy-mysql/share/doc/mysql-proxy/admin-sql.lua
+log-file = /usr/local/proxy-mysql/cn.log
+log-level = debug
+主要参数注解：
+proxy-backend-addresses                    mysql主库（写）地址
+proxy-read-only-backend-addresses     mysql从库（读）地址
+proxy-lua-script                                 读写分离脚本
+admin-lua-script                                 admin脚本
+admin-username                                 数据库用户名（主从上都需建立相同用户）
+admin-password                                 数据库密码
+daemon                                             daemon进程运行
+keepalive                                           保持连接（启动进程会有2个，一号进程用来监视二号进行，如果二号进程死掉自动重建，此参数在旧版本中无法使用）
+编辑profile/.bash_profile脚本
+vi /etc/profile(或者.bash_profile)
+LUA_PATH="/usr/local/proxy-mysql/share/doc/mysql-proxy/?.lua"
+export LUA_PATH
+export PATH=$PATH:/usr/local/proxy-mysql/bin
+:wq
+source /etc/profile
+为方便建立建立mysql-proxy.sh脚本
+#!/bin/bash
+mode=$1
+if [ -z "$mode" ] ; then
+mode="start"
+fi
+case $mode in
+start)
+mysql-proxy --defaults-file=/etc/mysql-proxy.cnf>/usr/local/proxy-mysql/cn.log &
+;;
+stop)
+killall -9 mysql-proxy
+;;
+restart)
+if $0 stop ; then
+$0 start
+else
+echo  "Restart failed!"
+exit 1
+fi
+;;
+esac
+exit 0
+启动mysql-proxy
+sh脚本
+启动：./mysql-proxy.sh  或 ./mysql-proxy.sh start
+启动日志
+重启：./mysql-proxy.sh restart
+停止：./mysql-proxy.sh stop
+测试：
+为达到测试效果，修改admin-sql.lua脚本以下两行
+vi /usr/local/proxy-mysql/share/doc/mysql-proxy/rw-splitting.lua
+if not proxy.global.config.rwsplit then
+        proxy.global.config.rwsplit = {
+                min_idle_connections = 1,   #修改最小连接为1
+                max_idle_connections = 2,   #修改最大连接为2
+                is_debug = true            #debug为true
+        }
+end
+重启mysql-proxy代理
+开启两个终端分别连接代理：
+ONE：./mysql -h192.168.0.88 -uzhangdongyu -p123123 -P4040
+TWO：./mysql -h192.168.0.88 -uzhangdongyu -p123123 -P4040
+可看到连接成功信息：
+操作ONE客户端：
+执行select语句观察数据库log文件
+select * from z_member_info;
+观察主从库日志文件，发现查询发生在主库？
+主库：192.168.0.88:3306日志文件：tail -f /usr/local/mysql/localstate/mysqlexecute.log
+这是因为mysql-proxy代理会检测客户端连接，当连接没有超过min_idle_connections预设值时，不会进行读写分离，即查询操作会发生到主库上。
+操作TWO客户端：
+执行select语句观察数据库log文件
+select * from z_member_info;
+观察主从库日志文件，发现主库没有任何记录，查询日志记录在从库。
+从库：192.168.0.88:3306日志文件：tail -f /usr/local/mysql3307/localstate/mysqlexecute.log
+操作两个终端进行insert操作，会发现写操作始终被主库（3306）日志文件记录。
+至此mysql-proxy安装测试完成。

@@ -1,0 +1,15 @@
+﻿#yum install vncserver
+#vim /etc/sysconfig/vncservers
+VNCSERVERS="1:root"
+VNCSERVERARGS[1]="-geometry 1024x768"
+#vncserver :1
+#/etc/init.d/vncserver start
+#vim /root/.vnc/xstartup
+将最后一行改为
+gnome &
+
+在Windows客户端下打开http://www.realvnc.com/，下载对应平台的VNC-Viewer客户端（该文件为绿色软件，无需安装），双击下载下来的文件即可打开
+
+在VNC Server一栏输入
+
+192.168.224.159:1
