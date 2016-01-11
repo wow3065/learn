@@ -1,0 +1,325 @@
+Server
+各サーバー間でユーザーのアカウント情報を共有できるように LDAP サーバーを構築します。
+[1]	OpenLDAP をインストールします。
+[root@dlp ~]# yum -y install openldap-servers openldap-clients 
+[root@dlp ~]# rpm -ivh openssh-ldap-xxx.rpm
+[root@dlp ~]# cp /usr/share/openldap-servers/DB_CONFIG.example /var/lib/ldap/DB_CONFIG
+[root@dlp ~]# chown ldap. /var/lib/ldap/DB_CONFIG 
+[root@dlp ~]# systemctl start slapd 
+[root@dlp ~]# systemctl enable slapd 
+[2]	OpenLDAP の管理者パスワードを設定します。
+# 管理者パスワード生成
+[root@dlp ~]# slappasswd 
+New password:
+Re-enter new password:
+{SSHA}xxxxxxxxxxxxxxxxxxxxxxxx
+[root@dlp ~]# vi chrootpw.ldif
+# olcRootPW に生成した管理者パスワードを指定する
+ dn: olcDatabase={0}config,cn=config
+changetype: modify
+add: olcRootPW
+olcRootPW: {SSHA}xxxxxxxxxxxxxxxxxxxxxxxx
+
+[root@dlp ~]# ldapadd -Y EXTERNAL -H ldapi:/// -f chrootpw.ldif 
+SASL/EXTERNAL authentication started
+SASL username: gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth
+SASL SSF: 0
+modifying entry "olcDatabase={0}config,cn=config"
+[3]	基本的なスキーマを読み込んでおきます。
+[root@dlp ~]# ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/cosine.ldif 
+SASL/EXTERNAL authentication started
+SASL username: gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth
+SASL SSF: 0
+adding new entry "cn=cosine,cn=schema,cn=config"
+
+[root@dlp ~]# ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/nis.ldif 
+SASL/EXTERNAL authentication started
+SASL username: gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth
+SASL SSF: 0
+adding new entry "cn=nis,cn=schema,cn=config"
+
+[root@dlp ~]# ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/inetorgperson.ldif 
+SASL/EXTERNAL authentication started
+SASL username: gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth
+SASL SSF: 0
+adding new entry "cn=inetorgperson,cn=schema,cn=config"
+[4]	自身のドメイン名を設定します。
+# ディレクトリマネージャーのパスワード生成
+[root@dlp ~]# slappasswd 
+New password:
+Re-enter new password:
+{SSHA}xxxxxxxxxxxxxxxxxxxxxxxx
+[root@dlp ~]# vi chdomain.ldif
+# dc=***,dc=*** は自身のドメイン名に置き換える
+# olcRootPW に生成したディレクトリマネージャーのパスワードを指定する
+ dn: olcDatabase={1}monitor,cn=config
+changetype: modify
+replace: olcAccess
+olcAccess: {0}to * by dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth"
+  read by dn.base="cn=Manager,dc=server,dc=world" read by * none
+
+dn: olcDatabase={2}hdb,cn=config
+changetype: modify
+replace: olcSuffix
+olcSuffix: dc=server,dc=world
+
+dn: olcDatabase={2}hdb,cn=config
+changetype: modify
+replace: olcRootDN
+olcRootDN: cn=Manager,dc=server,dc=world
+
+dn: olcDatabase={2}hdb,cn=config
+changetype: modify
+add: olcRootPW
+olcRootPW: {SSHA}xxxxxxxxxxxxxxxxxxxxxxxx
+
+dn: olcDatabase={2}hdb,cn=config
+changetype: modify
+add: olcAccess
+olcAccess: {0}to attrs=userPassword,shadowLastChange by
+  dn="cn=Manager,dc=server,dc=world" write by anonymous auth by self write by * none
+olcAccess: {1}to dn.base="" by * read
+olcAccess: {2}to * by dn="cn=Manager,dc=server,dc=world" write by * read
+
+[root@dlp ~]# ldapmodify -Y EXTERNAL -H ldapi:/// -f chdomain.ldif 
+SASL/EXTERNAL authentication started
+SASL username: gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth
+SASL SSF: 0
+modifying entry "olcDatabase={1}monitor,cn=config"
+
+modifying entry "olcDatabase={2}hdb,cn=config"
+
+modifying entry "olcDatabase={2}hdb,cn=config"
+
+modifying entry "olcDatabase={2}hdb,cn=config"
+
+[root@dlp ~]# vi basedomain.ldif
+# dc=***,dc=*** は自身のドメイン名に置き換える
+ dn: dc=server,dc=world
+objectClass: top
+objectClass: dcObject
+objectclass: organization
+o: Server World
+dc: Server
+
+dn: cn=Manager,dc=server,dc=world
+objectClass: organizationalRole
+cn: Manager
+description: Directory Manager
+
+dn: ou=People,dc=server,dc=world
+objectClass: organizationalUnit
+ou: People
+
+dn: ou=Group,dc=server,dc=world
+objectClass: organizationalUnit
+ou: Group
+
+[root@dlp ~]# ldapadd -x -D cn=Manager,dc=server,dc=world -W -f basedomain.ldif 
+Enter LDAP Password: # ディレクトリマネージャーのパスワード
+adding new entry "dc=server,dc=world"
+
+adding new entry "cn=Manager,dc=server,dc=world"
+
+adding new entry "ou=People,dc=server,dc=world"
+
+adding new entry "ou=Group,dc=server,dc=world"
+
+[root@dlp ~]# vi openssh-lpk.ldif
+# AUTO-GENERATED FILE - DO NOT EDIT!! Use ldapmodify.
+# CRC32 f6bf57a2
+dn: cn=openssh-lpk,cn=schema,cn=config
+objectClass: olcSchemaConfig
+cn: openssh-lpk
+olcAttributeTypes: {0}( 1.3.6.1.4.1.24552.500.1.1.1.13 NAME 'sshPublicKey' DES
+ C 'MANDATORY: OpenSSH Public key' EQUALITY octetStringMatch SYNTAX 1.3.6.1.4.
+ 1.1466.115.121.1.40 )
+olcObjectClasses: {0}( 1.3.6.1.4.1.24552.500.1.1.2.0 NAME 'ldapPublicKey' DESC
+  'MANDATORY: OpenSSH LPK objectclass' SUP top AUXILIARY MAY ( sshPublicKey $ 
+ uid ) )
+[root@dlp ~]# ldapadd -H ldapi:/// -Y EXTERNAL -f openssh-lpk.ldif
+
+
+
+ 	
+LDAP サーバーにユーザーアカウントを追加します。
+[1]	ユーザーを個別に追加します。
+# パスワード生成
+[root@dlp ~]# slappasswd 
+New password:
+Re-enter new password:
+{SSHA}xxxxxxxxxxxxxxxxx
+[root@dlp ~]# vi ldapuser.ldif
+# 新規作成
+# dc=***,dc=*** は自身のドメイン名に置き換える
+ dn: uid=cent,ou=People,dc=server,dc=world
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+cn: Cent
+sn: Linux
+userPassword: {SSHA}xxxxxxxxxxxxxxxxx
+loginShell: /bin/bash
+uidNumber: 1000
+gidNumber: 1000
+homeDirectory: /home/cent
+
+dn: cn=cent,ou=Group,dc=server,dc=world
+objectClass: posixGroup
+cn: Cent
+gidNumber: 1000
+memberUid: cent
+
+[root@dlp ~]# ldapadd -x -D cn=Manager,dc=server,dc=world -W -f ldapuser.ldif 
+Enter LDAP Password:
+adding new entry "uid=cent,ou=People,dc=server,dc=world"
+
+adding new entry "cn=cent,ou=Group,dc=server,dc=world"
+[2]	ローカル passwd/group に登録されているユーザー/グループを LDAP ディレクトリに一括登録します。
+[root@dlp ~]# vi ldapuser.sh
+# ローカルの UID/GID が 1000-9999 番のユーザーを抽出する
+# SUFFIX=*** は自身のドメイン名に置き換える
+# 一例ですのでご自由に改変してください
+ #!/bin/bash
+
+SUFFIX='dc=server,dc=world'
+LDIF='ldapuser.ldif'
+
+echo -n > $LDIF
+for line in `grep "x:[1-9][0-9][0-9][0-9]:" /etc/passwd | sed -e "s/ /%/g"`
+do
+    LUID="`echo $line | cut -d: -f1`"
+    NAME="`echo $line | cut -d: -f5 | cut -d, -f1`"
+
+    if [ ! "$NAME" ]
+    then
+        NAME="$LUID"
+    else
+        NAME=`echo "$NAME" | sed -e 's/%/ /g'`
+    fi
+
+    SN=`echo "$NAME" | awk '{print $2}'`
+    [ ! "$SN" ] && SN="$NAME"
+
+    LASTCHANGEFLAG=`grep $LUID: /etc/shadow | cut -d: -f3`
+    [ ! "$LASTCHANGEFLAG" ] && LASTCHANGEFLAG="0"
+
+    SHADOWFLAG=`grep $LUID: /etc/shadow | cut -d: -f9`
+    [ ! "$SHADOWFLAG" ] && SHADOWFLAG="0"
+
+    echo "dn: uid=$LUID,ou=People,$SUFFIX" >> $LDIF
+    echo "objectClass: inetOrgPerson" >> $LDIF
+    echo "objectClass: posixAccount" >> $LDIF
+    echo "objectClass: shadowAccount" >> $LDIF
+    echo "sn: $SN" >> $LDIF
+    echo "givenName: `echo $NAME | awk '{print $1}'`" >> $LDIF
+    echo "cn: $NAME" >> $LDIF
+    echo "displayName: $NAME" >> $LDIF
+    echo "uidNumber: `echo $line | cut -d: -f3`" >> $LDIF
+    echo "gidNumber: `echo $line | cut -d: -f4`" >> $LDIF
+    echo "userPassword: {crypt}`grep $LUID: /etc/shadow | cut -d: -f2`" >> $LDIF
+    echo "gecos: $NAME" >> $LDIF
+    echo "loginShell: `echo $line | cut -d: -f7`" >> $LDIF
+    echo "homeDirectory: `echo $line | cut -d: -f6`" >> $LDIF
+    echo "shadowExpire: `passwd -S $LUID | awk '{print $7}'`" >> $LDIF
+    echo "shadowFlag: $SHADOWFLAG" >> $LDIF
+    echo "shadowWarning: `passwd -S $LUID | awk '{print $6}'`" >> $LDIF
+    echo "shadowMin: `passwd -S $LUID | awk '{print $4}'`" >> $LDIF
+    echo "shadowMax: `passwd -S $LUID | awk '{print $5}'`" >> $LDIF
+    echo "shadowLastChange: $LASTCHANGEFLAG" >> $LDIF
+    echo >> $LDIF
+done
+
+for line in `grep "x:[1-9][0-9][0-9][0-9]:" /etc/group`
+do
+    CN="`echo $line | cut -d: -f1`"
+    LGID="`echo $line | cut -d: -f3`"
+    
+    echo "dn: cn=$CN,ou=Group,$SUFFIX" >> $LDIF
+    echo "objectClass: posixGroup" >> $LDIF
+    echo "cn: $CN" >> $LDIF
+    echo "gidNumber: $LGID" >> $LDIF
+    echo "memberUid: `grep ":$LGID:" /etc/passwd | cut -d: -f1`" >> $LDIF
+
+    users="`echo $line | cut -d: -f4`"
+    if [ "$users" ]
+    then
+        for user in `echo "$users" | sed 's/,/ /g'`
+        do
+            [ ! "$CN" = "$user" ] && echo "memberUid: $user" >> $LDIF
+        done
+    fi
+    echo >> $LDIF
+done
+
+[root@dlp ~]# sh ldapuser.sh 
+[root@dlp ~]# ldapadd -x -D cn=Manager,dc=server,dc=world -W -f ldapuser.ldif 
+Enter LDAP Password:
+adding new entry "uid=cent,ou=People,dc=server,dc=world"
+adding new entry "uid=redhat,ou=People,dc=server,dc=world"
+adding new entry "uid=ubuntu,ou=People,dc=server,dc=world"
+adding new entry "uid=debian,ou=People,dc=server,dc=world"
+adding new entry "cn=cent,ou=Group,dc=server,dc=world"
+adding new entry "cn=redhat,ou=Group,dc=server,dc=world"
+adding new entry "cn=ubuntu,ou=Group,dc=server,dc=world"
+adding new entry "cn=debian,ou=Group,dc=server,dc=world"
+[3]	登録したユーザーとグループを削除する場合は以下のようにします。
+[root@dlp ~]# ldapdelete -x -W -D 'cn=Manager,dc=server,dc=world' "uid=cent,ou=People,dc=server,dc=world" 
+Enter LDAP Password:
+[root@dlp ~]# ldapdelete -x -W -D 'cn=Manager,dc=server,dc=world' "cn=cent,ou=Group,dc=server,dc=world" 
+Enter LDAP Password:
+
+
+Client
+[root@dlp ~]# yum install authconfig nscd openldap-clients nss-pam-ldapd
+[root@dlp ~]# rpm -ivh /root/openssh-ldap-5.3p1-94.el6.x86_64.rpm
+[root@dlp ~]# authconfig --enablemd5 --enableshadow --enableldap --enableldapauth --ldapserver="ldap://172.25.60.93/" --ldapbasedn="dc=nttdata,dc=com" --enablemkhomedir --update
+[root@dlp ~]# cp /etc/openldap/ldap.conf /etc/openldap/ldap.conf.org
+[root@dlp ~]# vi /etc/openldap/ldap.conf
+BASE dc=nttdata,dc=com
+ssl no(追加)
+[root@dlp ~]# cp  /etc/pam.d/system-auth /etc/pam.d/system-auth.org
+[root@dlp ~]# vi /etc/pam.d/system-auth
+#%PAM-1.0
+# This file is auto-generated.
+# User changes will be destroyed the next time authconfig is run.
+auth        required      pam_env.so
+auth        sufficient    pam_fprintd.so
+auth        sufficient    pam_unix.so nullok try_first_pass
+auth        requisite     pam_succeed_if.so uid >= 500 quiet
+auth        sufficient    pam_ldap.so use_first_pass(修改)
+auth        required      pam_deny.so
+
+account     required      pam_unix.so broken_shadow
+account     sufficient    pam_localuser.so
+account     sufficient    pam_succeed_if.so uid < 500 quiet
+account     [default=bad success=ok user_unknown=ignore] pam_ldap.so(修改)
+account     required      pam_permit.so
+..................
+
+[root@dlp ~]# ln -s /etc/openldap/ldap.conf /etc/ssh/
+[root@dlp ~]# mv /etc/pam_ldap.conf /etc/pam_ldap.conf.org
+[root@dlp ~]# ln -s /etc/openldap/ldap.conf /etc/pam_ldap.conf
+[root@dlp ~]# cp /etc/ssh/sshd_config /etc/ssh/sshd_config.org
+[root@dlp ~]# vi /etc/ssh/sshd_config
+<PubkeyAuthentication no
+<GSSAPIAuthentication yes
+-------------------------
+>PubkeyAuthentication yes
+>GSSAPIAuthentication no
+>AuthorizedKeysCommand /usr/libexec/openssh/ssh-ldap-wrapper
+>AuthorizedKeysCommandRunAs root
+[root@dlp ~]# cp /etc/pam.d/password-auth /etc/pam.d/password-auth.org
+[root@dlp ~]# vi /etc/pam.d/password-auth
+[root@dlp ~]# cp -p /etc/nslcd.conf /etc/nslcd.conf.org
+[root@dlp ~]# vi /etc/nslcd.conf
+>
+-----------------------
+<filter passwd  (|(gidNumber=501)(uidNumber=507))
+<filter group  (|(gidNumber=501)(uidNumber=507))
+[root@dlp ~]#
+[root@dlp ~]#
+[root@dlp ~]#
+
+
+

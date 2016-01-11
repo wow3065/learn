@@ -1,0 +1,18 @@
+﻿yum install gcc gcc-c++ xz bc ncurses-devel hmaccalc zlib-devel binutils-devel elfutils-libelf-devel
+yum install qt-devel #如果有X环境时安装(目前不安装)
+tar -vxf linux-3.12.17.tar.xz
+cd linux-3.12.17
+make menuconfig
+打开菜单后，以默认方式保存<Save>，并退出<Exit>
+保存后，当前目录会自动生成.config文件
+执行完make menuconfig后，修改/usr/src/linux-2.6.35.4/.config
+将#CONFIG_SYSFS_DEPRECATED_V2 is not set
+默认被注释掉的，将其改为y。即修改为CONFIG_SYSFS_DEPRECATED_V2=y
+cp /boot/config-2.6.32-431.11.2.el6.x86_64 .config
+sudo sh -c 'yes "" | make oldconfig'
+make
+make modules_install install
+vim /boot/grub/menu.lst
+修改default=0，开机后，默认以第一项启动（3.12.17内核）
+保存退出
+shutdown -r now
