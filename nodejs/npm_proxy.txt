@@ -5,3 +5,6 @@ npm config set registry=http://registry.npmjs.org
 
 install 
 yum -y install gcc make gcc-c++ openssl-devel wget 
+
+
+express-generator
