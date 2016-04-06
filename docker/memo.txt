@@ -1,0 +1,2 @@
+[root@localhost tmp]# docker exec sshd  ip -o -f inet addr show eth0|awk '{print $4}'|awk -F '/' '{print $1}'
+172.17.0.4

@@ -110,7 +110,7 @@ mysql> exit
 [root@ip-172-31-16-240 redmine]#mkdir -p tmp tmp/pdf public/plugin_assets
 [root@ip-172-31-16-240 redmine]#chown -R ec2-user:ec2-user files log tmp public/plugin_assets
 [root@ip-172-31-16-240 redmine]#chmod -R 755 files log tmp public/plugin_assets
-[root@ip-172-31-16-240 redmine]#ruby script(bin)/rails server webrick -e production –b 0.0.0.0
+[root@ip-172-31-16-240 redmine]#ruby script(bin)/rails server webrick -e production -b 0.0.0.0
 访问服务器：http://IP:3000 默认登录帐号：admin / admin
 [root@ip-172-31-16-240 ~]#cd /usr/local/redmine/config/
 [root@ip-172-31-16-240 ~]#vi configuration.yml
