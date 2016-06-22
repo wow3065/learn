@@ -1,0 +1,10 @@
+﻿.config(function($stateProvider, $urlRouterProvider,$ionicConfigProvider) {
+
+    //使用$ionicConfigProvider服务解决ionic项目生成的导航栏在手机顶部的问题
+    $ionicConfigProvider.platform.ios.tabs.style('standard');
+    $ionicConfigProvider.platform.ios.tabs.position('bottom');
+    $ionicConfigProvider.platform.android.tabs.style('standard');
+    $ionicConfigProvider.platform.android.tabs.position('standard');
+
+    $ionicConfigProvider.platform.ios.navBar.alignTitle('center');
+	$ionicConfigProvider.platform.android.navBar.alignTitle('left');

@@ -1,0 +1,31 @@
+Installation
+
+This module requires Node.js 4.0 or higher to run.
+
+# for use in npm scripts
+npm install electron-packager --save-dev
+
+# for use from cli
+npm install electron-packager -g
+
+From the Command Line
+
+Running electron-packager from the command line has this basic form:
+
+electron-packager <sourcedir> <appname> --platform=<platform> --arch=<arch> [optional flags...]
+
+This will:
+
+    Find or download the correct release of Electron
+    Use that version of Electron to create a app in <out>/<appname>-<platform>-<arch> (this can be customized via an optional flag)
+
+For details on the optional flags, run electron-packager --help or see usage.txt.
+
+If appname is omitted, this will use the name specified by "productName" or "name" in the nearest package.json.
+
+You should be able to launch the app on the platform you built for. If not, check your settings and try again.
+
+Be careful not to include node_modules you don't want into your final app. electron-packager, electron-prebuilt and .git will be ignored by default. You can use --ignore to ignore files and folders via a regular expression. For example, --ignore=node_modules/package-to-ignore or --ignore="node_modules/(some-package[0-9]*|dev-dependency)".
+
+--------------------------
+>electron-packager first tutorial_clock --platform=win32 --arch=x64 --version 1.1.0
