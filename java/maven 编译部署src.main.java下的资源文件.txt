@@ -1,0 +1,16 @@
+﻿maven默认会把src/main/resources下的所有配置文件以及src/main/java下的所有java文件打包或发布到target\classes下面，但是现实我们可能会在src/main/java下面也放置一些配置文件如hibernate配置文件或mybatis mapper配置文件等，如果不做一些额外配置，那我们打包后的项目可能找不到这些必须的资源文件，因此在pom.xml中增加类似如下配置：
+
+<build>
+  <resources>
+   <resource>
+    <directory>src/main/java</directory>
+    <includes>
+     <include>**/*.xml</include>
+    </includes>
+   </resource>
+  </resources>
+ </build>
+
+就会将src/main/java下的xml文件随同java编译后的class文件一同copy到相应的class目录
+
+source:http://outofmemory.cn/code-snippet/3822/maven-compile-bushu-src-main-java-de-resource-file
