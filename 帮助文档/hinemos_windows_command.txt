@@ -1,0 +1,1 @@
+powershell -nologo -command "echo 'ni hao a '>c:\work\test.txt"
