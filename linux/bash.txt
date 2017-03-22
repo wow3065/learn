@@ -1,0 +1,9 @@
+﻿1	${listFile##/*/} 表示接取${listFile}这个字符串以/结尾的最后字符。
+	列：/tmp/sh/test.txt最后显示test.txt
+2	logger命令是一个shell命令(接口). 你可以通过该接口使用syslog的系统日志模块 你还可以从命令行直接向系统日志文件写入一行信息.
+	比如, 记录硬盘升级后的系统重启信息:
+	复制代码 代码示例:
+	$ logger System rebooted for hard disk upgrade
+	然后你可以查看/var/log/message文件:   
+3	mktemp 自动在/tmp文件夹下建立暂存文件，返回其文件名（包括路径/tmp）。该命令创建的临时文件的文件名比较随机，能保证一定的安全性。
+	使用mktemp 命令生成临时文件时，文件名参数可以“文件名.XXXX”的模版形式给出，mktemp 会根据模版在当前目录建立一个临时文件。

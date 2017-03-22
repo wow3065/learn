@@ -494,3 +494,56 @@ AuthorizedKeysCommand /usr/bin/sss_ssh_authorizedkeys
 客户端（Ansible）
 
 具体请参考我的这个Ansible Role
+
+
+ldap 数据备份方式
+
+1 slapcat -v -l ldapbackup.ldif
+2 　分析原因：slapcat备份出来的ldapback.ldif中有系统自动生成的系统信息不能导入需要清除
+
+　　解决方案：清除ldapback.ldif中的系统信息
+
+　　步骤：
+
+　　1、新建过滤正则表达式slapcat.regex
+
+cat >slapcat.regex <<EOF
+/^creatorsName: /d
+/^createTimestamp: /d
+/^modifiersName: /d
+/^modifyTimestamp: /d
+/^structuralObjectClass: /d
+/^entryUUID: /d
+/^entryCSN: /d
+EOF
+
+　　2、过滤掉系统信息
+
+cat ldapback.ldif | sed -f slapcat.regex > slapdata.ldif
+　　3、使用ldapadd导入
+
+ldapadd -H ldap://127.0.0.1 -x -D "用户" -f slapdata.ldif -w 密码
+#或 服务器程序导入 初始使用可能失败
+#slapadd -l slapdate.ldif
+
+　　备份方案二：
+ldapsearch -x -b 'dc=com,dc=cn' > ldapbackup.ldif
+
+其他方案：
+
+　　[方法1]
+
+　　关闭：kill -INT `cat /var/run/slapd.pid`
+　　启动：/usr/sbin/slapd
+　　备份：/usr/sbin/slapcat>mail_ldap.ldif
+　　导入：ldapadd -x -D "cn=Manager,dc=domain,dc=com" -w secret -v -f mail_ldap.ldif
+　　关闭模式导入:
+　　slapadd -l mail_ldap.ldif -f /etc/openldap/sladp.conf
+
+　　[方法2]
+
+　　系统突然掉电或重启引起LDAP数据库意外关闭造成的。
+
+　　进入ldap数据目录(/openldap/var/openldap-data)，执行db_recover，再启动服务.
+
+　　/var/lib/ldap slapd db_recover
