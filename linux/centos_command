@@ -1,7 +1,9 @@
 
 
-安装了最小化redhat7，在bash环境下，不能用tab键补全命令
+redhat7或者centos7在bash环境下，不能用tab键补全命令
 
-例如，我在设置防火墙的时候，输出firewall-cmd ,按两下tab键，没有显示选项命令。
+由于系统缺少了bash-completion.noarch
 
-经过一番搜索，这是由于系统缺少了bash-completion；用yum安装，reboot之后，补全命令可用。
+安装完bash-completion.noarch后系统重新启动。
+
+命令提示完成
