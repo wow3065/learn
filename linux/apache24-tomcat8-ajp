@@ -1,0 +1,36 @@
+
+AJP-apache and tomcat
+  $httpd -M |grep proxy
+   proxy_module (shared)       #need
+   proxy_ajp_module (shared)   #need
+   proxy_balancer_module (shared)
+   proxy_connect_module (shared)
+   proxy_express_module (shared)
+   proxy_fcgi_module (shared)
+   proxy_fdpass_module (shared)
+   proxy_ftp_module (shared)
+   proxy_http_module (shared)
+   proxy_scgi_module (shared)
+   proxy_wstunnel_module (shared)
+  
+  vi /etc/httpd/conf.modules.d/00-proxy.conf
+  ProxyPass /examples/ ajp://localhost:8009/examples/
+
+
+WebSocket
+  $httpd -M |grep proxy
+   proxy_module (shared)       #need
+   proxy_ajp_module (shared)   #need
+   proxy_balancer_module (shared)
+   proxy_connect_module (shared)
+   proxy_express_module (shared)
+   proxy_fcgi_module (shared)
+   proxy_fdpass_module (shared)
+   proxy_ftp_module (shared)
+   proxy_http_module (shared)
+   proxy_scgi_module (shared)
+   proxy_wstunnel_module (shared)  #need
+   
+   vi /etc/httpd/conf.modules.d/00-proxy.conf
+   ProxyPass /examples/websocket/ ws://localhost:8080/examples/websocket/
+   ProxyPassReverse /examples/websocket/ ws://localhost:8080/examples/websocket/
