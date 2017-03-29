@@ -32,5 +32,7 @@ WebSocket
    proxy_wstunnel_module (shared)  #need
    
    vi /etc/httpd/conf.modules.d/00-proxy.conf
+   LoadModule proxy_wstunnel_module modules/mod_proxy_wstunnel.so
+   
    ProxyPass /examples/websocket/ ws://localhost:8080/examples/websocket/
    ProxyPassReverse /examples/websocket/ ws://localhost:8080/examples/websocket/
