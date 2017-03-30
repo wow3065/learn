@@ -1,4 +1,6 @@
 
+Centos7之后命令参数自动补全
+yum group install "Development Tools"
 
 redhat7或者centos7在bash环境下，不能用tab键补全命令
 
