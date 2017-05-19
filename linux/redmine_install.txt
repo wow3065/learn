@@ -139,6 +139,40 @@ mysql> exit
 [root@ip-172-31-16-240 ~]#systemctl start httpd
 
 
+https_httpd.conf
+NameVirtualHost *:443
+<VirtualHost *:443>
+    ServerName localhost
+    DocumentRoot /usr/local/redmine/public
+    RailsBaseURI /app
+    CustomLog /var/log/httpd/ssl-access.log combined
+    ErrorLog /var/log/httpd/ssl-error.log
+
+    SSLEngine on
+    SSLProtocol all -SSLv2
+    SSLCipherSuite ALL:!ADH:!EXPORT:!SSLv2:RC4+RSA:+HIGH:+MEDIUM:+LOW
+    SSLCertificateFile /etc/pki/tls/certs/ndc.com-ca.crt
+    SSLCertificateKeyFile /etc/pki/tls/private/ndc.com.key
+    SSLCACertificateFile /etc/pki/tls/certs/cacert.pem
+    SSLVerifyClient require
+    SSLVerifyDepth  10
+
+    Header onsuccess append Cache-Control public
+    ExpiresActive On
+    ExpiresByType text/css "access plus 3 days"
+    ExpiresByType application/x-javascript "access plus 3 days"
+    ExpiresByType image/jpeg "access plus 3 days"
+    ExpiresByType image/png "access plus 3 days"
+    ExpiresByType image/gif "access plus 3 days"
+
+    <Directory /usr/local/redmine/public>
+       AllowOverride all
+       Options -MultiViews
+    </Directory>
+
+</VirtualHost>
+
+
 1定位（到redmine所在的路径下的config/certs）创建RAS秘钥
   openssl genrsa -des3 -out server.key 1024
 2 创建CSR（Certificate signing request）
