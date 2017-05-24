@@ -1,0 +1,9 @@
+隐藏apache版本号和系统信息方法
+----------前---------
+ServerTokens OS
+ServerSignature On
+----------后---------
+ServerTokens Prod
+ServerSignature Off
+
+httpd服务重新启动
