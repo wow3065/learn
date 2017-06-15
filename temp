@@ -1,0 +1,30 @@
+import nltk
+from nltk.corpus.reader import *
+import json
+
+def getPosResultlist(filePath, filename,
+                     encoding='utf-8',
+                     sent_tokenizer=r'^(?!\s*#).*?\n',
+                     word_tokenizer=r'\s+'):
+    reader = PlaintextCorpusReader(filePath,
+                                   filename,
+                                   encoding=encoding,
+                                   sent_tokenizer=nltk.RegexpTokenizer(sent_tokenizer),
+                                   word_tokenizer=nltk.RegexpTokenizer(word_tokenizer, gaps=True)
+                                   )
+    resultkey=list(reader.sents())
+    print(resultkey)
+    resultlist=[]
+    for x in resultkey:
+        if resultkey.index(x)==0 and resultkey.index(x)<len(resultkey):
+            resultlist.append([x[0],"",resultkey[resultkey.index(x)+1][0]])
+        elif (resultkey.index(x)+1)==len(resultkey):
+            resultlist.append([x[0],resultkey[resultkey.index(x)-1][0],""])
+        else:
+            resultlist.append([x[0],resultkey[resultkey.index(x)-1][0],resultkey[resultkey.index(x)+1][0]])
+    print(resultlist)
+    resultjson=json.dumps({'content':resultlist})
+    print(resultjson)
+    return resultlist
+
+dict1=getPosResultlist(filePath='D:/tmp/2.2', filename='httpd3.conf')
