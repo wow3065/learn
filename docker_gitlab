@@ -1,1 +1,19 @@
 http://docs.gitlab.com/ce/ci/docker/using_docker_build.html#using-the-overlayfs-driver
+
+[root@localhost ~]# cat /etc/gitlab-runner/config.toml
+concurrent = 1
+check_interval = 0
+
+[[runners]]
+  name = "localhost.localdomain"
+  url = "http://192.168.95.118"
+  token = "c1866de05316b992017740997e609b"
+  executor = "docker"
+  [runners.docker]
+    tls_verify = false
+    image = "alpine:latest"
+    privileged = false
+    disable_cache = false
+    volumes = ["/var/run/docker.sock:/var/run/docker.sock","/cache"]
+    shm_size = 0
+  [runners.cache]
