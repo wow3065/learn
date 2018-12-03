@@ -1,0 +1,5 @@
+$curl  http://10.10.105.71:5000/v2/_catalog
+{"repositories":["tonybai/busybox"]}
+
+$ curl  http://10.10.105.71:5000/v2/tonybai/busybox/tags/list
+{"name":"tonybai/busybox","tags":["latest"]}
