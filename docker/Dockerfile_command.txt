@@ -1,0 +1,60 @@
+1 FROM：指定基础镜像，必须为第一个命令
+  格式：
+　　FROM <image>
+　　FROM <image>:<tag>
+　　FROM <image>@<digest>
+2 MAINTAINER: 维护者信息
+  格式：
+    MAINTAINER <name>
+3 RUN：构建镜像时执行的命令
+  RUN用于在镜像容器中执行命令，其有以下两种命令执行方式：
+  shell执行
+  格式：
+    RUN <command>
+  exec执行
+  格式：
+    RUN ["executable", "param1", "param2"]
+4 ADD：将本地文件添加到容器中，tar类型文件会自动解压(网络压缩资源不会被解压)，可以访问网络资源。
+  格式：
+    ADD <src>... <dest>
+    ADD ["<src>",... "<dest>"] 用于支持包含空格的路径
+5 COPY：功能类似ADD，但是是不会自动解压文件，也不能访问网络资源。
+6 CMD：构建容器后调用，也就是在容器启动时才进行调用。
+  格式：
+    CMD ["executable","param1","param2"] (执行可执行文件，优先)
+    CMD ["param1","param2"] (设置了ENTRYPOINT，则直接调用ENTRYPOINT添加参数)
+    CMD command param1 param2 (执行shell内部命令)
+7 ENTRYPOINT：配置容器，使其可执行化。配合CMD可省去"application"，只使用参数。
+  格式：
+    ENTRYPOINT ["executable", "param1", "param2"] (可执行文件, 优先)
+    ENTRYPOINT command param1 param2 (shell内部命令)
+8 LABEL：用于为镜像添加元数据
+  格式：
+    LABEL <key>=<value> <key>=<value> <key>=<value> ...
+9 ENV：设置环境变量
+  格式：
+    ENV <key> <value>  #<key>之后的所有内容均会被视为其<value>的组成部分，因此，一次只能设置一个变量
+    ENV <key>=<value> ...  #可以设置多个变量，每个变量为一个"<key>=<value>"的键值对，如果<key>中包含空格，可以使用\来进行转义，也可以通过""来进行标示；另外，反斜线也可以用于续行
+10 EXPOSE：指定于外界交互的端口
+   格式：
+    EXPOSE <port> [<port>...]
+11 VOLUME：用于指定持久化目录
+   格式：
+    VOLUME ["/path/to/dir"]
+12 WORKDIR：工作目录，类似于cd命令
+   格式：
+    WORKDIR /path/to/workdir
+13 USER:指定运行容器时的用户名或 UID，后续的 RUN 也会使用指定用户。使用USER指定用户时，可以使用用户名、UID或GID，或是两者的组合。当服务不需要管理员权限时，可以通过该命令指定运行用户。并且可以在之前创建所需要的用户
+   格式:
+　　USER user
+　　USER user:group
+　　USER uid
+　　USER uid:gid
+　　USER user:gid
+　　USER uid:group
+14 ARG：用于指定传递给构建运行时的变量
+   格式：
+    ARG <name>[=<default value>]
+15 ONBUILD：用于设置镜像触发器
+   格式：
+　　ONBUILD [INSTRUCTION]
