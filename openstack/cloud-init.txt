@@ -1,0 +1,33 @@
+wget https://launchpad.net/ubuntu/+archive/primary/+sourcefiles/cloud-init/19.2-78-ge8138959-0ubuntu1/cloud-init_19.2-78-ge8138959.orig.tar.gz
+tar xf cloud-init_19.2-78-ge8138959.orig.tar.gz
+apt install python-pip
+pip install 'requests<2.20.0'
+wget https://files.pythonhosted.org/packages/d9/ca/7279974e489e8b65003fe618a1a741d6350227fa2bf48d16be76c7422423/setuptools-41.2.0.zip --no-check-certificate
+unzip setuptools-41.2.0.zip
+cd setuptools-41.2.0
+python setup.py install
+pip install --upgrade six
+cd ../cloud-init-19.2-78-ge8138959
+pip install -r requirements.txt
+apt-get install cloud-guest-utils -y
+
+
+-----------------------------------------
+a.	编辑 /etc/cloud/cloud.cfg 禁用 “禁用root用户” 功能。
+-----------------------------------------
+b.	编辑/etc/cloud/cloud.cfg.d/90_dpkg.cfg  配置cloudinit数据源，只允许ConfigDrive, OpenStack, None三种。
+-----------------------------------------
+systemctl enable cloud-init
+-----------------------------------------
+关闭并禁用firewalld服务: systemctl stop firewalld; systemctl disable firewalld;
+重定向cloudinit日志到控制台，参考 这里 完成配置
+-----------------------------------------
+cloudinit/config/cc_set_passwords.py
+    LOG.info("=== Module cc_set_passwd ===")
+    md = cloud.datasource.metadata.get('meta')
+    adminPass = md.get('admin_pass')
+    LOG.info("Retrieve admin passwd: %s" % adminPass)
+    if adminPass:
+        usr_passwd_pair = 'root:%s\n' % adminPass
+        util.subp(['chpasswd'], usr_passwd_pair)
+        return
