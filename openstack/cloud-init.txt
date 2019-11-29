@@ -10,6 +10,13 @@ pip install --upgrade six
 cd ../cloud-init-19.2-78-ge8138959
 pip install -r requirements.txt
 apt-get install cloud-guest-utils -y
+python setup.py build
+python setup.py install --init-system systemd
+ln -s /usr/local/bin/cloud-init /usr/bin/cloud-init 
+systemctl enable cloud-init-local.service 
+systemctl enable cloud-init.service
+systemctl enable cloud-config.service
+systemctl enable cloud-final.service
 
 
 -----------------------------------------
